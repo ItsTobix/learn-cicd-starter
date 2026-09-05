@@ -42,7 +42,7 @@ func TestGetAPIKeyMalformed(t *testing.T) {
 
 		got, err := GetAPIKey(inputHeader)
 
-		if err == nil || err.Error() != wantedErr.Error() {
+		if err == nil || err.Error() == wantedErr.Error() {
 			t.Errorf("want: %v, got: %v", wantedErr, err)
 		}
 

@@ -21,8 +21,11 @@ jobs:
       - name: Unit-Testing
         run:  go test ./...  -cover
 
-      - name: Force Failure
-        run: (exit 0)
+      - name: Install gosec
+        run: go install github.com/securego/gosec/v2/cmd/gosec@latest
+
+      - name: Run gosec
+        run: gosec ./...
 
   style:
       name: Style
@@ -46,8 +49,3 @@ jobs:
         - name: Run staticcheck
           run: staticcheck ./...
 
-        - name: Install gosec
-          run: go install github.com/securego/gosec/v2/cmd/gosec@latest
-
-        - name: Run gosec
-          run: gosec ./...

@@ -13,23 +13,39 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v6
 
-      # - name: Set up Go
-      #   uses: actions/setup-go@v6
-      #   with:
-      #     go-version: "1.27.1"
-
-      # Was passiert:
-      # - ubuntu-latest-Runner haben bereits Go vorinstalliert (meist mehrere Versionen, mit einer Standardversion im PATH). go test ./... findet also ein go-Binary und läuft.
-      # - Welche Version das genau ist, entscheidet GitHub — nicht du. Das ändert sich über Zeit, wenn GitHub das Runner-Image aktualisiert.
-      # - Falls dein go.mod eine go-Direktive mit einer höheren Version enthält als die vorinstallierte, lädt der Go-Toolchain-Mechanismus (seit Go 1.21, GOTOOLCHAIN=auto per Default) automatisch die passende Version nach — solange Netzwerkzugriff besteht. Das funktioniert also meistens "automagisch".
-      
-      # Der eigentliche Nachteil:
-      # - Keine Reproduzierbarkeit. Ohne actions/setup-go mit fixierter Version testest du gegen eine undokumentierte, sich potenziell ändernde Go-Version. Ein CI-Lauf, der heute grün ist, kann nach einem GitHub-Image-Update plötzlich mit einer neuen Go-Version anders reagieren (neue Vet-Checks, Verhaltensänderungen etc.) — schwer nachzuvollziehen.
-      # - Du verlierst die Garantie, dass CI dieselbe Go-Version testet, die z.B. Entwickler lokal oder in Produktion nutzen.
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: "1.27.1"
       
       - name: Unit-Testing
         run:  go test ./...  -cover
 
+      - name: Install gosec
+        run: go install github.com/securego/gosec/v2/cmd/gosec@latest
 
-      - name: Force Failure
-        run: (exit 0)
+      - name: Run gosec
+        run: gosec ./...
+
+  style:
+      name: Style
+      runs-on: ubuntu-latest
+
+      steps:
+        - name: Check out code
+          uses: actions/checkout@v6
+
+        - name: Set up Go
+          uses: actions/setup-go@v6
+          with:
+            go-version: "1.27.1"
+
+        - name: Check formatting
+          run: test -z $(go fmt ./...)
+
+        - name: Install staticcheck
+          run: go install honnef.co/go/tools/cmd/staticcheck@latest
+
+        - name: Run staticcheck
+          run: staticcheck ./...
+
